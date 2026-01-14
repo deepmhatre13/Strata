@@ -9,15 +9,22 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
+    "db:seed": "node prisma/seed.js",
+    "demo:test": "node scripts/generate-demo-test.js",
+    "demo:recommendations": "node scripts/generate-demo-recommendations.js",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-query": "^5.62.7",
     "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
     "express": "^4.21.1",
     "papaparse": "^5.5.0",
     "recharts": "2.15.4",

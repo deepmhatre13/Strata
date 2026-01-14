@@ -1,6 +1,8 @@
+import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
 import { PrismaClient } from '@prisma/client'
+import demoRoutes from './routes/demo.js'
 
 const prisma = new PrismaClient()
 const app = express()
@@ -8,6 +10,7 @@ const PORT = process.env.PORT || 3001
 
 app.use(cors())
 app.use(express.json())
+app.use(demoRoutes)
 
 // Health check
 app.get('/health', (req, res) => {
