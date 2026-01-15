@@ -92,7 +92,7 @@ export function Dashboard() {
   const chartConfig = {
     score: {
       label: 'Score',
-      color: 'var(--chart-1, #2563EB)',
+      color: 'var(--chart-1, #E17B5F)',
     },
   }
 
@@ -102,16 +102,16 @@ export function Dashboard() {
         {stats.map(stat => (
           <article
             key={stat.id}
-            className="rounded-xl border border-[#E7E5E4] bg-white p-4 flex flex-col justify-between hover:-translate-y-1 hover:border-blue-600 transition-transform"
+            className="rounded-xl border border-[#F2D5C8] bg-white p-4 flex flex-col justify-between hover:-translate-y-1 hover:border-[#E17B5F] transition-transform shadow-sm"
           >
-            <p className="text-[11px] font-semibold tracking-[0.14em] text-[#78716C] uppercase mb-1">
+            <p className="text-[11px] font-semibold tracking-[0.14em] text-[#E17B5F] uppercase mb-1">
               {stat.label}
             </p>
-            <p className="text-2xl font-semibold tracking-tight">{stat.value}</p>
+            <p className="text-2xl font-semibold tracking-tight text-[#2D3436]">{stat.value}</p>
             <p
               className={
                 'mt-2 text-xs font-medium ' +
-                (stat.trend === 'up' ? 'text-emerald-600' : 'text-red-600')
+                (stat.trend === 'up' ? 'text-emerald-700' : 'text-red-600')
               }
             >
               {stat.delta} vs last 7 days
@@ -121,18 +121,18 @@ export function Dashboard() {
       </section>
 
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <article className="lg:col-span-2">
+        <article className="lg:col-span-2 rounded-xl border border-[#F2D5C8] bg-white p-4 shadow-sm">
           <ChartContainer config={chartConfig} className="h-full">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-base font-semibold">Score trend (last tests)</h2>
-              <span className="text-xs text-[#78716C]">
+              <h2 className="text-base font-semibold text-[#2D3436]">Score trend (last tests)</h2>
+              <span className="text-xs text-[#8D8A86]">
                 {summaryQuery.isLoading ? 'Loading…' : 'Synced with backend'}
               </span>
             </div>
             <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E7E5E4" vertical={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#F4E0D5" vertical={false} />
                   <XAxis
                     dataKey="label"
                     tickLine={false}
@@ -151,9 +151,9 @@ export function Dashboard() {
                   <Line
                     type="monotone"
                     dataKey="score"
-                    stroke="var(--color-score, #2563EB)"
+                    stroke="var(--color-score, #E17B5F)"
                     strokeWidth={2.4}
-                    dot={{ r: 3, fill: '#fff', stroke: 'var(--color-score, #2563EB)' }}
+                    dot={{ r: 3, fill: '#fff', stroke: 'var(--color-score, #E17B5F)' }}
                     activeDot={{ r: 5, strokeWidth: 1.5 }}
                   />
                 </LineChart>
@@ -162,10 +162,10 @@ export function Dashboard() {
           </ChartContainer>
         </article>
 
-        <article className="rounded-xl border border-[#E7E5E4] bg-white p-5 space-y-4">
+        <article className="rounded-xl border border-[#F2D5C8] bg-white p-5 space-y-4 shadow-sm">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-semibold">Focus areas</h2>
-            <span className="text-xs text-[#78716C]">
+            <h2 className="text-base font-semibold text-[#2D3436]">Focus areas</h2>
+            <span className="text-xs text-[#8D8A86]">
               {recsQuery.isLoading ? 'Loading…' : 'High impact first'}
             </span>
           </div>

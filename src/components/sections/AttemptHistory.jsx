@@ -46,21 +46,21 @@ export function AttemptHistory() {
     <div className="space-y-4">
       <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
         <div>
-          <h2 className="text-base font-semibold">Attempt history</h2>
-          <p className="text-xs text-[#78716C]">
+          <h2 className="text-base font-semibold text-[#E17B5F]">Attempt history</h2>
+          <p className="text-xs text-[#8D8A86]">
             Recent mocks and drills with score and pacing.
           </p>
         </div>
         <button
           type="button"
-          className="inline-flex items-center rounded-lg bg-blue-600 px-3 py-2 text-xs font-medium text-white hover:bg-blue-700 transition-colors"
+          className="inline-flex items-center rounded-lg bg-[#E17B5F] px-3 py-2 text-xs font-medium text-white hover:bg-[#D06A4E] transition-colors shadow-sm"
         >
           Upload CSV
         </button>
       </header>
 
-      <section className="rounded-xl border border-[#E7E5E4] bg-white overflow-hidden">
-        <div className="hidden md:grid grid-cols-[2fr,1fr,1fr,1fr] bg-[#F5F5F4] text-[11px] font-semibold uppercase tracking-[0.16em] text-[#57534E]">
+      <section className="rounded-xl border border-[#F2D5C8] bg-white overflow-hidden shadow-sm">
+        <div className="hidden md:grid grid-cols-[2fr,1fr,1fr,1fr] bg-[#FFF5F0] text-[11px] font-semibold uppercase tracking-[0.16em] text-[#7A7068]">
           <div className="px-4 py-3">Attempt</div>
           <div className="px-4 py-3">Date</div>
           <div className="px-4 py-3">Score</div>
@@ -70,18 +70,18 @@ export function AttemptHistory() {
           {rows.map(attempt => (
             <article
               key={attempt.id}
-              className="grid grid-cols-1 md:grid-cols-[2fr,1fr,1fr,1fr] gap-y-1 md:gap-y-0 bg-white hover:bg-[#F5F5F4] transition-colors"
+              className="grid grid-cols-1 md:grid-cols-[2fr,1fr,1fr,1fr] gap-y-1 md:gap-y-0 bg-white hover:bg-[#FFF5F0] transition-colors"
             >
               <div className="px-4 py-3 flex items-center justify-between md:block">
                 <div>
                   <p className="text-sm font-medium">{attempt.name}</p>
-                  <p className="mt-0.5 text-xs text-[#78716C]">ID: {attempt.id}</p>
+                  <p className="mt-0.5 text-xs text-[#8D8A86]">ID: {attempt.id}</p>
                 </div>
                 <p className="mt-0.5 text-xs text-[#78716C] md:hidden">
                   {attempt.date} · {attempt.score}
                 </p>
               </div>
-              <p className="px-4 py-3 text-sm text-[#57534E] hidden md:flex items-center">
+              <p className="px-4 py-3 text-sm text-[#7A7068] hidden md:flex items-center">
                 {attempt.date}
               </p>
               <p className="px-4 py-3 text-sm font-medium hidden md:flex items-center">

@@ -8,8 +8,8 @@ const tabs = [
 
 export function NavTabs({ activeTab, onChange }) {
   return (
-    <nav className="border-b border-[#E7E5E4]">
-      <div className="flex gap-6 text-sm">
+    <nav className="border-b border-[#F4E0D5]">
+      <div className="flex gap-6 text-sm text-[#7A7068]">
         {tabs.map(tab => {
           const isActive = tab.id === activeTab
 
@@ -21,13 +21,13 @@ export function NavTabs({ activeTab, onChange }) {
               className={
                 'relative py-3 border-b-2 -mb-px whitespace-nowrap transition-colors ' +
                 (isActive
-                  ? 'border-blue-600 text-[#1C1917] font-medium'
-                  : 'border-transparent text-[#57534E] hover:text-[#1C1917]')
+                  ? 'border-[#E17B5F] text-[#2D3436] font-medium'
+                  : 'border-transparent text-[#A8A29E] hover:text-[#2D3436]')
               }
             >
               {tab.label}
               {isActive && (
-                <span className="absolute inset-x-0 -bottom-[1px] h-[2px] bg-blue-600 rounded-full" />
+                <span className="absolute inset-x-0 -bottom-[1px] h-[2px] bg-[#E17B5F] rounded-full" />
               )}
             </button>
           )

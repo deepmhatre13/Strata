@@ -38,12 +38,12 @@ export function TopicMastery() {
     <div className="space-y-4">
       <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
         <div>
-          <h2 className="text-base font-semibold">Topic mastery heatmap</h2>
-          <p className="text-xs text-[#78716C]">
+          <h2 className="text-base font-semibold text-[#E17B5F]">Topic mastery heatmap</h2>
+          <p className="text-xs text-[#8D8A86]">
             Each cell shows your current mastery estimate per topic.
           </p>
         </div>
-        <div className="flex items-center gap-2 text-[11px] text-[#78716C]">
+        <div className="flex items-center gap-2 text-[11px] text-[#8D8A86]">
           <span className="inline-flex h-4 w-4 rounded bg-[#FEE2E2]" />
           0–20%
           <span className="inline-flex h-4 w-4 rounded bg-[#FED7AA]" />
@@ -62,11 +62,11 @@ export function TopicMastery() {
           <article
             key={topic.topic}
             className={
-              'relative rounded-lg p-4 transition-transform hover:-translate-y-1 ' +
+              'relative rounded-lg p-4 transition-transform hover:-translate-y-1 shadow-sm border border-[#F2D5C8] ' +
               cellColor(topic.mastery)
             }
           >
-            <p className="text-xs font-semibold tracking-[0.14em] text-[#57534E] uppercase">
+            <p className="text-xs font-semibold tracking-[0.14em] text-[#4B463F] uppercase">
               {topic.topic}
             </p>
             <p className="mt-2 text-2xl font-semibold tabular-nums">

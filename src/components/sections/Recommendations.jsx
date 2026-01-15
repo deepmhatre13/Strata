@@ -30,21 +30,21 @@ export function Recommendations() {
     <div className="space-y-4">
       <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
         <div>
-          <h2 className="text-base font-semibold">Recommendations</h2>
-          <p className="text-xs text-[#78716C]">
+          <h2 className="text-base font-semibold text-[#E17B5F]">Recommendations</h2>
+          <p className="text-xs text-[#8D8A86]">
             Generated from your mock performance trends.
           </p>
         </div>
         <button
           type="button"
-          className="inline-flex items-center rounded-lg border border-[#E7E5E4] px-3 py-1.5 text-xs font-medium text-[#57534E] hover:bg-[#F5F5F4]"
+          className="inline-flex items-center rounded-lg border border-[#F2D5C8] px-3 py-1.5 text-xs font-medium text-[#7A7068] hover:bg-[#FFF5F0] bg-white shadow-sm"
         >
           Refresh insights
         </button>
       </header>
 
       {recsQuery.isLoading && (
-        <p className="text-xs text-[#78716C]">Loading recommendations…</p>
+        <p className="text-xs text-[#8D8A86]">Loading recommendations…</p>
       )}
 
       <section className="space-y-3">
@@ -76,9 +76,9 @@ export function Recommendations() {
                   >
                     {priority.charAt(0).toUpperCase() + priority.slice(1)} priority
                   </span>
-                  <h3 className="text-sm font-semibold">{focusArea}</h3>
+                  <h3 className="text-sm font-semibold text-[#2D3436]">{focusArea}</h3>
                 </div>
-                <p className="text-[11px] text-[#78716C]">
+                <p className="text-[11px] text-[#8D8A86]">
                   {Math.round(confidenceScore)}% confidence · {dataPointCount} data points
                 </p>
               </header>
