@@ -5,18 +5,53 @@ const DEMO_USER_ID = 'demo-user-1'
 
 const fallbackAttempts = [
   {
-    id: 'mock-6',
-    name: 'Full mock test 6',
+    id: 'mock-12',
+    name: 'JEE Main Mock Test 12',
+    date: 'Jan 15',
+    score: '87%',
+    time: '3h 5m',
+  },
+  {
+    id: 'mock-11',
+    name: 'JEE Main Mock Test 11',
     date: 'Jan 12',
     score: '83%',
     time: '2h 52m',
   },
   {
-    id: 'mock-5',
-    name: 'Full mock test 5',
+    id: 'mock-10',
+    name: 'JEE Main Mock Test 10',
     date: 'Jan 9',
     score: '80%',
     time: '2h 58m',
+  },
+  {
+    id: 'mock-9',
+    name: 'JEE Main Mock Test 9',
+    date: 'Jan 6',
+    score: '78%',
+    time: '2h 45m',
+  },
+  {
+    id: 'mock-8',
+    name: 'JEE Main Mock Test 8',
+    date: 'Jan 3',
+    score: '75%',
+    time: '2h 50m',
+  },
+  {
+    id: 'drill-15',
+    name: 'Probability Drill Set 15',
+    date: 'Jan 14',
+    score: '72%',
+    time: '45m',
+  },
+  {
+    id: 'drill-14',
+    name: 'Algebra Drill Set 14',
+    date: 'Jan 11',
+    score: '85%',
+    time: '38m',
   },
 ]
 

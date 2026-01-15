@@ -1,3 +1,5 @@
+import { useLocation, useNavigate } from 'react-router-dom'
+
 const tabs = [
   { id: 'dashboard', label: 'Dashboard' },
   { id: 'topics', label: 'Topic mastery' },
@@ -6,7 +8,17 @@ const tabs = [
   { id: 'settings', label: 'Settings' },
 ]
 
-export function NavTabs({ activeTab, onChange }) {
+export function NavTabs() {
+  const location = useLocation()
+  const navigate = useNavigate()
+  
+  // Get active tab from URL hash or default to dashboard
+  const activeTab = location.hash.slice(1) || 'dashboard'
+
+  const handleTabClick = (tabId) => {
+    navigate(`/dashboard#${tabId}`, { replace: true })
+  }
+
   return (
     <nav className="border-b border-[#F4E0D5]">
       <div className="flex gap-6 text-sm text-[#7A7068]">
@@ -17,7 +29,7 @@ export function NavTabs({ activeTab, onChange }) {
             <button
               key={tab.id}
               type="button"
-              onClick={() => onChange(tab.id)}
+              onClick={() => handleTabClick(tab.id)}
               className={
                 'relative py-3 border-b-2 -mb-px whitespace-nowrap transition-colors ' +
                 (isActive
