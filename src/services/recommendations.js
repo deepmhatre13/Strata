@@ -1,10 +1,7 @@
 import { api } from '../lib/apiClient'
 
-export async function fetchRecommendations(userId, { activeOnly = true } = {}) {
-  if (!userId) return { success: false, error: 'Missing user id', data: [] }
-
+export async function fetchRecommendations({ activeOnly = true } = {}) {
   return await api.get('/api/recommendations', {
-    user_id: userId,
     active_only: activeOnly.toString(),
   })
 }

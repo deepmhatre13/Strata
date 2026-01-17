@@ -27,6 +27,8 @@ model User {
   id          String   @id @default(uuid())
   email       String   @unique
   name        String?
+  password    String?  // Hashed password for email/password auth
+  googleId    String?  @unique // Google OAuth ID
   preferences Json?    // JSONB for flexible settings
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
@@ -83,6 +85,8 @@ model TestSession {
   userId        String   @map("user_id")
   testName      String   @map("test_name")
   testDate      DateTime @map("test_date")
+  examType      String?  @map("exam_type")
+  source        String?  @map("source")
   overallScore  Float?   @map("overall_score")
   totalQuestions Int     @map("total_questions")
   totalTime     Int      @map("total_time") // in seconds

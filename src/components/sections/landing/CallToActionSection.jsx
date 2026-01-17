@@ -18,14 +18,14 @@ export function CallToActionSection() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
             <button
               type="button"
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate('/signin')}
               className="bg-[#2D3436] hover:bg-black text-white px-8 py-4 rounded-lg text-[16px] font-medium transition-all shadow-md"
             >
               Get Started Now
             </button>
             <button
               type="button"
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate('/signin')}
               className="text-[#2D3436] font-medium hover:underline"
             >
               View sample dashboard first

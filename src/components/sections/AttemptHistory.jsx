@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { fetchAttempts } from '../../services/attempts'
 
-const DEMO_USER_ID = 'demo-user-1'
 
 const fallbackAttempts = [
   {
@@ -57,8 +56,8 @@ const fallbackAttempts = [
 
 export function AttemptHistory() {
   const query = useQuery({
-    queryKey: ['attempts', DEMO_USER_ID],
-    queryFn: async () => fetchAttempts(DEMO_USER_ID, { limit: 50 }),
+    queryKey: ['attempts'],
+    queryFn: async () => fetchAttempts({ limit: 50 }),
   })
 
   const rows =

@@ -1,15 +1,36 @@
 import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
+import passport from 'passport'
+import session from 'express-session'
 import { PrismaClient } from '@prisma/client'
+import { authenticateToken } from './middleware/auth.js'
 import demoRoutes from './routes/demo.js'
+import authRoutes from './routes/auth.js'
+import uploadRoutes from './routes/upload.js'
 
 const prisma = new PrismaClient()
 const app = express()
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT || 6969
 
-app.use(cors())
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true,
+}))
 app.use(express.json())
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'your-session-secret',
+    resave: false,
+    saveUninitialized: false,
+  })
+)
+app.use(passport.initialize())
+app.use(passport.session())
+
+// Routes
+app.use('/api/v1/auth', authRoutes)
+app.use('/api', uploadRoutes)
 app.use(demoRoutes)
 
 // Health check
@@ -18,12 +39,9 @@ app.get('/health', (req, res) => {
 })
 
 // Analytics endpoints
-app.get('/api/analytics/summary', async (req, res) => {
+app.get('/api/analytics/summary', authenticateToken, async (req, res) => {
   try {
-    const { user_id: userId } = req.query
-    if (!userId) {
-      return res.status(400).json({ success: false, error: 'Missing user_id', data: null })
-    }
+    const userId = req.user.id
 
     const attempts = await prisma.questionAttempt.findMany({
       where: { userId },
@@ -78,19 +96,26 @@ app.get('/api/analytics/summary', async (req, res) => {
   }
 })
 
-app.get('/api/analytics/topic-mastery', async (req, res) => {
+app.get('/api/analytics/topic-mastery', authenticateToken, async (req, res) => {
   try {
-    const { user_id: userId } = req.query
-    if (!userId) {
-      return res.status(400).json({ success: false, error: 'Missing user_id', data: [] })
-    }
+    const userId = req.user.id
 
     const attempts = await prisma.questionAttempt.findMany({
       where: { userId },
       orderBy: { attemptedAt: 'desc' },
     })
 
-    // Group by topic and calculate mastery with recency decay
+    if (attempts.length === 0) {
+      return res.json({ success: true, error: null, data: [] })
+    }
+
+    // Calculate global averages for normalization
+    const allTimes = attempts.map(a => a.timeTakenSeconds)
+    const avgTimeGlobal = allTimes.reduce((sum, t) => sum + t, 0) / allTimes.length
+    const maxTimeGlobal = Math.max(...allTimes, 1)
+    const minTimeGlobal = Math.min(...allTimes, 0)
+
+    // Group by topic and calculate mastery with multiple signals
     const topicMap = new Map()
     const now = new Date()
 
@@ -103,23 +128,72 @@ app.get('/api/analytics/topic-mastery', async (req, res) => {
       }
 
       const daysAgo = (now - attempt.attemptedAt) / (1000 * 60 * 60 * 24)
-      const weight = Math.pow(0.5, daysAgo / 7)
+      const weight = Math.pow(0.5, daysAgo / 7) // Recency decay
+      
       topicMap.get(topic).push({
         correctness: attempt.correctness ? 1 : 0,
         weight,
+        timeTaken: attempt.timeTakenSeconds,
+        confidence: attempt.confidenceRating,
       })
     })
 
-    const topicMastery = Array.from(topicMap.entries()).map(([topic, scores]) => {
-      const totalWeight = scores.reduce((sum, s) => sum + s.weight, 0)
-      const mastery = totalWeight > 0
-        ? (scores.reduce((sum, s) => sum + s.correctness * s.weight, 0) / totalWeight) * 100
-        : 0
+    const topicMastery = Array.from(topicMap.entries()).map(([topic, attempts]) => {
+      const totalWeight = attempts.reduce((sum, a) => sum + a.weight, 0)
+      
+      // Signal 1: Accuracy (60% weight)
+      const weightedCorrect = attempts.reduce((sum, a) => sum + (a.correctness * a.weight), 0)
+      const accuracy = totalWeight > 0 ? weightedCorrect / totalWeight : 0
+
+      // Signal 2: Speed factor (20% weight)
+      // Normalize time: faster = better, penalize unusually slow
+      const avgTime = attempts.reduce((sum, a) => sum + (a.timeTaken * a.weight), 0) / totalWeight
+      // Normalize to 0-1 scale (inverse: lower time = higher score)
+      // Use percentile-based normalization
+      const timePercentile = avgTimeGlobal > 0 
+        ? Math.max(0, Math.min(1, 1 - (avgTime - minTimeGlobal) / (maxTimeGlobal - minTimeGlobal || 1)))
+        : 0.5
+      const normalizedSpeed = timePercentile
+
+      // Signal 3: Confidence alignment (20% weight)
+      // Penalize high confidence when wrong, reward high confidence when right
+      let confidenceAlignment = 0
+      if (attempts.length > 0) {
+        const alignmentScores = attempts.map(a => {
+          if (a.correctness) {
+            // Correct: higher confidence = better alignment
+            return (a.confidence - 1) / 4 // Normalize 1-5 to 0-1
+          } else {
+            // Incorrect: higher confidence = worse alignment (misconception)
+            return 1 - (a.confidence - 1) / 4 // Invert: high confidence when wrong = low score
+          }
+        })
+        confidenceAlignment = attempts.reduce((sum, a, i) => 
+          sum + (alignmentScores[i] * a.weight), 0) / totalWeight
+      }
+
+      // Combined mastery score
+      const mastery_score = (accuracy * 0.6) + (normalizedSpeed * 0.2) + (confidenceAlignment * 0.2)
+
+      // Calculate additional metrics
+      const correctCount = attempts.filter(a => a.correctness).length
+      const totalAttempts = attempts.length
+      const avgTime = attempts.reduce((sum, a) => sum + a.timeTaken, 0) / totalAttempts
+      
+      // Confidence gap: high confidence when wrong
+      const incorrectAttempts = attempts.filter(a => !a.correctness)
+      const highConfidenceIncorrect = incorrectAttempts.filter(a => a.confidence >= 4).length
+      const confidenceGap = incorrectAttempts.length > 0 
+        ? (highConfidenceIncorrect / incorrectAttempts.length) > 0.3 ? 'high' : 'low'
+        : 'low'
 
       return {
         topic,
-        mastery_score: Math.round(mastery * 10) / 10,
-        attempts: scores.length,
+        mastery: Math.round(mastery_score * 1000) / 10, // 0-100 scale
+        accuracy: Math.round(accuracy * 1000) / 10,
+        avg_time: Math.round(avgTime),
+        confidence_gap: confidenceGap,
+        attempts: totalAttempts,
       }
     }).sort((a, b) => a.topic.localeCompare(b.topic))
 
@@ -131,17 +205,25 @@ app.get('/api/analytics/topic-mastery', async (req, res) => {
 })
 
 // Attempts endpoints
-app.get('/api/attempts', async (req, res) => {
+app.get('/api/attempts', authenticateToken, async (req, res) => {
   try {
-    const { user_id: userId, limit = 50 } = req.query
-    if (!userId) {
-      return res.status(400).json({ success: false, error: 'Missing user_id', data: [] })
-    }
+    const userId = req.user.id
+    const { limit = 50 } = req.query
 
     const attempts = await prisma.questionAttempt.findMany({
       where: { userId },
       orderBy: { attemptedAt: 'desc' },
       take: parseInt(limit),
+      include: {
+        testSession: {
+          select: {
+            testName: true,
+            testDate: true,
+            examType: true,
+            source: true,
+          },
+        },
+      },
     })
 
     res.json({ success: true, error: null, data: attempts })
@@ -151,12 +233,81 @@ app.get('/api/attempts', async (req, res) => {
   }
 })
 
-app.post('/api/attempts/bulk', async (req, res) => {
+// Attempt history endpoint - groups by test and shows trends
+app.get('/api/attempt-history', authenticateToken, async (req, res) => {
   try {
-    const { user_id: userId, attempts } = req.body
-    if (!userId) {
-      return res.status(400).json({ success: false, error: 'Missing user_id', data: null })
+    const userId = req.user.id
+
+    // Get all test sessions with their attempts
+    const testSessions = await prisma.testSession.findMany({
+      where: { userId },
+      include: {
+        attempts: true,
+      },
+      orderBy: { testDate: 'desc' },
+    })
+
+    const history = testSessions.map(session => {
+      const attempts = session.attempts
+      const correctCount = attempts.filter(a => a.correctness).length
+      const accuracy = attempts.length > 0 ? (correctCount / attempts.length) * 100 : 0
+      const avgTime = attempts.length > 0
+        ? attempts.reduce((sum, a) => sum + a.timeTakenSeconds, 0) / attempts.length
+        : 0
+
+      // Group by topic for this test
+      const topicMap = new Map()
+      attempts.forEach(attempt => {
+        const topic = attempt.questionMetadata?.topic || 'Unknown'
+        if (!topicMap.has(topic)) {
+          topicMap.set(topic, { total: 0, correct: 0 })
+        }
+        topicMap.get(topic).total++
+        if (attempt.correctness) {
+          topicMap.get(topic).correct++
+        }
+      })
+
+      const topics = Array.from(topicMap.entries()).map(([topic, data]) => ({
+        topic,
+        accuracy: data.total > 0 ? (data.correct / data.total) * 100 : 0,
+        attempts: data.total,
+      }))
+
+      return {
+        test: session.testName,
+        testDate: session.testDate,
+        accuracy: Math.round(accuracy * 10) / 10,
+        avg_time: Math.round(avgTime),
+        totalQuestions: session.totalQuestions,
+        overallScore: session.overallScore ? Math.round(session.overallScore * 10) / 10 : null,
+        topics,
+      }
+    })
+
+    // Calculate trends
+    if (history.length >= 2) {
+      const recent = history[0]
+      const previous = history[1]
+      const trend = {
+        accuracyChange: recent.accuracy - previous.accuracy,
+        timeChange: recent.avg_time - previous.avg_time,
+        direction: recent.accuracy > previous.accuracy ? 'improving' : 'declining',
+      }
+      history[0].trend = trend
     }
+
+    res.json({ success: true, error: null, data: history })
+  } catch (error) {
+    console.error('Error fetching attempt history:', error)
+    res.status(500).json({ success: false, error: error.message, data: [] })
+  }
+})
+
+app.post('/api/attempts/bulk', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id
+    const { attempts } = req.body
     if (!Array.isArray(attempts) || attempts.length === 0) {
       return res.status(400).json({ success: false, error: 'No attempts provided', data: null })
     }
@@ -185,12 +336,10 @@ app.post('/api/attempts/bulk', async (req, res) => {
 })
 
 // Recommendations endpoints
-app.get('/api/recommendations', async (req, res) => {
+app.get('/api/recommendations', authenticateToken, async (req, res) => {
   try {
-    const { user_id: userId, active_only: activeOnly = 'true' } = req.query
-    if (!userId) {
-      return res.status(400).json({ success: false, error: 'Missing user_id', data: [] })
-    }
+    const userId = req.user.id
+    const { active_only: activeOnly = 'true' } = req.query
 
     const where = {
       userId,
@@ -209,7 +358,7 @@ app.get('/api/recommendations', async (req, res) => {
   }
 })
 
-app.patch('/api/recommendations/:id/follow', async (req, res) => {
+app.patch('/api/recommendations/:id/follow', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params
 

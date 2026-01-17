@@ -4,8 +4,6 @@ import { fetchSummary } from '../../services/analytics'
 import { fetchRecommendations } from '../../services/recommendations'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart'
 
-const DEMO_USER_ID = 'demo-user-1'
-
 const fallbackStats = [
   {
     id: 'avgScore',
@@ -39,13 +37,13 @@ const fallbackStats = [
 
 export function Dashboard() {
   const summaryQuery = useQuery({
-    queryKey: ['summary', DEMO_USER_ID],
-    queryFn: async () => fetchSummary(DEMO_USER_ID),
+    queryKey: ['summary'],
+    queryFn: async () => fetchSummary(),
   })
 
   const recsQuery = useQuery({
-    queryKey: ['recommendations', DEMO_USER_ID],
-    queryFn: async () => fetchRecommendations(DEMO_USER_ID, { activeOnly: true }),
+    queryKey: ['recommendations'],
+    queryFn: async () => fetchRecommendations({ activeOnly: true }),
   })
 
   const summary = summaryQuery.data?.success ? summaryQuery.data.data : null

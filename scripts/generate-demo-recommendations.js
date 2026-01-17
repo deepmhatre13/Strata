@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-undef */
 /**
  * CLI script to generate demo recommendations
  * Usage: node scripts/generate-demo-recommendations.js [userId]

@@ -1,13 +1,18 @@
 // API client for backend endpoints
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:6969'
 
 async function apiRequest(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`
+  const token = localStorage.getItem('token') || localStorage.getItem('auth_token')
+  
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(token && { Authorization: `Bearer ${token}` }),
+    ...options.headers,
+  }
+  
   const config = {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
+    headers,
     ...options,
   }
 
@@ -26,10 +31,10 @@ async function apiRequest(endpoint, options = {}) {
 }
 
 export const api = {
-  get: (endpoint, params = {}) => {
+  get: (endpoint, params = {}, options = {}) => {
     const queryString = new URLSearchParams(params).toString()
     const url = queryString ? `${endpoint}?${queryString}` : endpoint
-    return apiRequest(url, { method: 'GET' })
+    return apiRequest(url, { method: 'GET', ...options })
   },
   post: (endpoint, body) => {
     return apiRequest(endpoint, {

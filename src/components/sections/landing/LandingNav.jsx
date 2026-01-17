@@ -42,9 +42,9 @@ export function LandingNav() {
 
         <div className="flex items-center gap-4">
           <button
-            className="bg-[#E17B5F] hover:bg-[#D06A4E] text-white px-5 py-2 rounded-full text-[15px] font-medium transition-transform hover:scale-105 shadow-sm"
+            className="bg-[#C17B5F] hover:bg-[#B06A4E] text-white px-5 py-2 rounded-full text-[15px] font-medium transition-transform hover:scale-105 shadow-sm"
             type="button"
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/signin')}
           >
             Get Started
           </button>

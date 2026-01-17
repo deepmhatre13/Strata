@@ -4,20 +4,19 @@ import {
   markRecommendationFollowed,
 } from '../../services/recommendations'
 
-const DEMO_USER_ID = 'demo-user-1'
 
 export function Recommendations() {
   const queryClient = useQueryClient()
 
   const recsQuery = useQuery({
-    queryKey: ['recommendations', DEMO_USER_ID],
-    queryFn: async () => fetchRecommendations(DEMO_USER_ID, { activeOnly: true }),
+    queryKey: ['recommendations'],
+    queryFn: async () => fetchRecommendations({ activeOnly: true }),
   })
 
   const followMutation = useMutation({
     mutationFn: markRecommendationFollowed,
     onSuccess() {
-      queryClient.invalidateQueries({ queryKey: ['recommendations', DEMO_USER_ID] })
+      queryClient.invalidateQueries({ queryKey: ['recommendations'] })
     },
   })
 

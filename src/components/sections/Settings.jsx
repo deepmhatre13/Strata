@@ -1,4 +1,15 @@
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../contexts/AuthContext'
+
 export function Settings() {
+  const navigate = useNavigate()
+  const { logout, user } = useAuth()
+
+  const handleLogout = () => {
+    logout()
+    navigate('/signin')
+  }
+
   return (
     <div className="space-y-6">
       <header>
@@ -34,6 +45,31 @@ export function Settings() {
             Reset demo data
           </button>
         </article>
+      </section>
+
+      <section className="rounded-xl border border-[#F2D5C8] bg-white p-5 space-y-4 shadow-sm">
+        <h3 className="text-sm font-semibold">Account</h3>
+        {user && (
+          <div className="space-y-2">
+            <div>
+              <p className="text-xs text-[#8D8A86]">Email</p>
+              <p className="text-sm font-medium text-[#2D3436]">{user.email}</p>
+            </div>
+            {user.name && (
+              <div>
+                <p className="text-xs text-[#8D8A86]">Name</p>
+                <p className="text-sm font-medium text-[#2D3436]">{user.name}</p>
+              </div>
+            )}
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="inline-flex items-center rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors shadow-sm"
+        >
+          Sign out
+        </button>
       </section>
     </div>
   )

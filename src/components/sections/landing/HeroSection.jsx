@@ -21,8 +21,8 @@ export function HeroSection() {
           <div className="flex flex-col sm:flex-row gap-4 mb-8">
             <button
               type="button"
-              onClick={() => navigate('/dashboard')}
-              className="bg-[#E17B5F] hover:bg-[#D06A4E] text-white px-8 py-3.5 rounded-lg text-[16px] font-medium transition-all hover:shadow-lg hover:-translate-y-1"
+              onClick={() => navigate('/signin')}
+              className="bg-[#C17B5F] hover:bg-[#B06A4E] text-white px-8 py-3.5 rounded-lg text-[16px] font-medium transition-all hover:shadow-lg hover:-translate-y-1"
             >
               Try Live Demo
             </button>

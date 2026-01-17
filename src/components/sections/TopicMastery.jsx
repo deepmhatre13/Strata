@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { fetchTopicMastery } from '../../services/analytics'
 
-const DEMO_USER_ID = 'demo-user-1'
 
 const fallbackTopics = [
   { topic: 'Algebra', mastery: 82 },
@@ -22,8 +21,8 @@ function cellColor(mastery) {
 
 export function TopicMastery() {
   const query = useQuery({
-    queryKey: ['topic-mastery', DEMO_USER_ID],
-    queryFn: async () => fetchTopicMastery(DEMO_USER_ID),
+    queryKey: ['topic-mastery'],
+    queryFn: async () => fetchTopicMastery(),
   })
 
   const topics =

@@ -1,6 +1,13 @@
 
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
+import { Passport } from './components/auth/Passport'
+import { AuthProvider } from './contexts/AuthContext'
+import { ProtectedRoute } from './components/auth/ProtectedRoute'
+import { SignIn } from './components/auth/SignIn'
+import { SignUp } from './components/auth/SignUp'
+import { Success } from './components/auth/Success'
+import { GoogleSuccess } from './components/auth/GoogleSuccess'
 import { TopNav } from './components/layout/TopNav'
 import { AppHeader } from './components/layout/AppHeader'
 import { NavTabs } from './components/layout/NavTabs'
@@ -43,10 +50,25 @@ function DashboardLayout() {
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/dashboard" element={<DashboardLayout />} />
-    </Routes>
+    <Passport>
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/success" element={<Success />} />
+          <Route path="/auth/google/callback" element={<GoogleSuccess />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </AuthProvider>
+    </Passport>
   )
 }
 
