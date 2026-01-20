@@ -51,7 +51,6 @@ router.post('/upload-test', authenticateToken, async (req, res) => {
     // Parse CSV file
     const parseResult = await new Promise((resolve, reject) => {
       Papa.parse(csvContent, {
-      Papa.parse(csvText, {
         header: true,
         skipEmptyLines: true,
         transformHeader: (header) => header.trim().toLowerCase().replace(/\s+/g, '_'),

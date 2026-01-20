@@ -138,28 +138,28 @@ app.get('/api/analytics/topic-mastery', authenticateToken, async (req, res) => {
       })
     })
 
-    const topicMastery = Array.from(topicMap.entries()).map(([topic, attempts]) => {
-      const totalWeight = attempts.reduce((sum, a) => sum + a.weight, 0)
+    const topicMastery = Array.from(topicMap.entries()).map(([topic, topicAttempts]) => {
+      const totalWeight = topicAttempts.reduce((sum, a) => sum + a.weight, 0)
       
       // Signal 1: Accuracy (60% weight)
-      const weightedCorrect = attempts.reduce((sum, a) => sum + (a.correctness * a.weight), 0)
+      const weightedCorrect = topicAttempts.reduce((sum, a) => sum + (a.correctness * a.weight), 0)
       const accuracy = totalWeight > 0 ? weightedCorrect / totalWeight : 0
 
       // Signal 2: Speed factor (20% weight)
       // Normalize time: faster = better, penalize unusually slow
-      const avgTime = attempts.reduce((sum, a) => sum + (a.timeTaken * a.weight), 0) / totalWeight
+      const weightedAvgTime = topicAttempts.reduce((sum, a) => sum + (a.timeTaken * a.weight), 0) / totalWeight
       // Normalize to 0-1 scale (inverse: lower time = higher score)
       // Use percentile-based normalization
       const timePercentile = avgTimeGlobal > 0 
-        ? Math.max(0, Math.min(1, 1 - (avgTime - minTimeGlobal) / (maxTimeGlobal - minTimeGlobal || 1)))
+        ? Math.max(0, Math.min(1, 1 - (weightedAvgTime - minTimeGlobal) / (maxTimeGlobal - minTimeGlobal || 1)))
         : 0.5
       const normalizedSpeed = timePercentile
 
       // Signal 3: Confidence alignment (20% weight)
       // Penalize high confidence when wrong, reward high confidence when right
       let confidenceAlignment = 0
-      if (attempts.length > 0) {
-        const alignmentScores = attempts.map(a => {
+      if (topicAttempts.length > 0) {
+        const alignmentScores = topicAttempts.map(a => {
           if (a.correctness) {
             // Correct: higher confidence = better alignment
             return (a.confidence - 1) / 4 // Normalize 1-5 to 0-1
@@ -168,7 +168,7 @@ app.get('/api/analytics/topic-mastery', authenticateToken, async (req, res) => {
             return 1 - (a.confidence - 1) / 4 // Invert: high confidence when wrong = low score
           }
         })
-        confidenceAlignment = attempts.reduce((sum, a, i) => 
+        confidenceAlignment = topicAttempts.reduce((sum, a, i) => 
           sum + (alignmentScores[i] * a.weight), 0) / totalWeight
       }
 
@@ -176,12 +176,12 @@ app.get('/api/analytics/topic-mastery', authenticateToken, async (req, res) => {
       const mastery_score = (accuracy * 0.6) + (normalizedSpeed * 0.2) + (confidenceAlignment * 0.2)
 
       // Calculate additional metrics
-      const correctCount = attempts.filter(a => a.correctness).length
-      const totalAttempts = attempts.length
-      const avgTime = attempts.reduce((sum, a) => sum + a.timeTaken, 0) / totalAttempts
+      const correctCount = topicAttempts.filter(a => a.correctness).length
+      const totalAttempts = topicAttempts.length
+      const avgTimeRaw = topicAttempts.reduce((sum, a) => sum + a.timeTaken, 0) / totalAttempts
       
       // Confidence gap: high confidence when wrong
-      const incorrectAttempts = attempts.filter(a => !a.correctness)
+      const incorrectAttempts = topicAttempts.filter(a => !a.correctness)
       const highConfidenceIncorrect = incorrectAttempts.filter(a => a.confidence >= 4).length
       const confidenceGap = incorrectAttempts.length > 0 
         ? (highConfidenceIncorrect / incorrectAttempts.length) > 0.3 ? 'high' : 'low'
@@ -191,7 +191,7 @@ app.get('/api/analytics/topic-mastery', authenticateToken, async (req, res) => {
         topic,
         mastery: Math.round(mastery_score * 1000) / 10, // 0-100 scale
         accuracy: Math.round(accuracy * 1000) / 10,
-        avg_time: Math.round(avgTime),
+        avg_time: Math.round(avgTimeRaw),
         confidence_gap: confidenceGap,
         attempts: totalAttempts,
       }
